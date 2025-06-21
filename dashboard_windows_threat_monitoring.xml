@@ -1,0 +1,80 @@
+<form version="1.1" theme="light">
+  <label>Windows Threat Monitoring</label>
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Failed Logon Attempts</title>
+      <chart>
+        <title>Track brute-force or suspicious login behavior.</title>
+        <search>
+          <query>index=main sourcetype="WinEventLog:Security" EventCode=4625 | stats count by Account_Name | sort - count</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Suspicious PowerShell Activity</title>
+      <table>
+        <title>Detect PowerShell usage and potential misuse (T1059)</title>
+        <search>
+          <query>index=main sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| eval LowerCmd=lower(CommandLine)  
+| eval suspicion_score=0    
+| eval suspicion_score=suspicion_score +      
+    if(like(LowerCmd, "%encodedcommand%"), 1, 0) +      
+    if(like(LowerCmd, "%iex%"), 1, 0) +      
+    if(like(LowerCmd, "%invoke-expression%"), 1, 0) +      
+    if(like(LowerCmd, "%bypass%"), 1, 0) +      
+    if(like(LowerCmd, "%downloadstring%"), 1, 0) +      
+    if(like(LowerCmd, "%.ps1%"), 1, 0) +      
+    if(like(LowerCmd, "%new-object%"), 1, 0) +      
+    if(like(LowerCmd, "%frombase64string%"), 1, 0) +      
+    if(like(LowerCmd, "%start-bitstransfer%"), 1, 0) +
+    if(like(LowerCmd, "%hidden%"), 1, 0) +
+    if(like(LowerCmd, "%nop%"), 1, 0) +
+    if(like(LowerCmd, "%windowstyle%"), 1, 0)
+| where suspicion_score &gt; 0
+| table _time, ComputerName, User, suspicion_score, ParentImage, CommandLine
+| sort -suspicion_score -_time</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="count">5</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Registry Persistence Attempts</title>
+      <table>
+        <title>Persistence via registry modifications (T1547)</title>
+        <search>
+          <query>index=main sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" (EventCode=13 OR EventCode=4657)
+| eval registry_path=lower(TargetObject)
+| where (like(registry_path, "%\\currentversion\\run%") OR like(registry_path, "%\\runonce%"))
+| where like(Image, "%powershell.exe") OR like(Image, "%cmd.exe") OR like(Image, "%wscript.exe") OR like(Image, "%reg.exe")
+| table _time, User, Image, TargetObject, Details</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="count">5</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

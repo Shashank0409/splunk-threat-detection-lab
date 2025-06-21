@@ -1,0 +1,15 @@
+index=main sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| eval suspicious=if(like(CommandLine, "%encodedcommand%") OR like(CommandLine, "%bypass%") OR like(CommandLine, "%hidden%"), 1, 0)
+| where suspicious=1
+| rename _time as psh_time
+| table psh_time, User, CommandLine
+| join type=inner User [
+    search index=main sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" (EventCode=13 OR EventCode=4657)
+    | rename _time as reg_time
+    | table reg_time, User, TargetObject
+]
+| eval time_diff = reg_time - psh_time
+| where time_diff >= 0 AND time_diff < 300
+| eval reg_time = strftime(reg_time, "%Y-%m-%d %H:%M:%S")
+| eval psh_time = strftime(psh_time, "%Y-%m-%d %H:%M:%S")
+| table User, CommandLine, TargetObject, psh_time, reg_time, time_diff

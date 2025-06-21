@@ -1,0 +1,16 @@
+index=main sourcetype="WinEventLog:Security" (EventCode=4625 OR EventCode=4624)
+| eval event_type=if(EventCode==4625, "fail", "success")
+| eval login_time=_time
+| eval fail_time=if(event_type=="fail", login_time, null())
+| eval success_login_time=if(event_type=="success", login_time, null())
+| stats 
+    count(eval(event_type=="fail")) as failed_attempts 
+    latest(fail_time) as last_fail_time 
+    latest(success_login_time) as success_time 
+    by Account_Name, Source_Network_Address
+| where failed_attempts >= 5 AND isnotnull(success_time)
+| eval time_diff = success_time - last_fail_time
+| where time_diff >= 0 AND time_diff <= 600
+| eval last_fail_time=strftime(last_fail_time, "%Y-%m-%d %H:%M:%S")
+| eval success_time=strftime(success_time, "%Y-%m-%d %H:%M:%S")
+| table Account_Name, Source_Network_Address, failed_attempts, last_fail_time, success_time, time_diff

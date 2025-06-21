@@ -1,0 +1,5 @@
+index=main sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" (EventCode=13 OR EventCode=4657)
+| eval registry_path=lower(TargetObject)
+| where (like(registry_path, "%\\currentversion\\run%") OR like(registry_path, "%\\runonce%"))
+| where like(Image, "%powershell.exe") OR like(Image, "%cmd.exe") OR like(Image, "%wscript.exe") OR like(Image, "%reg.exe")
+| table _time, User, Image, TargetObject, Details
