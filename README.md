@@ -6,13 +6,13 @@ This project simulates a small-scale Security Operations Center (SOC) using **Sp
 
 ## 📌 Project Summary
 
-In this lab, a Windows 10 virtual machine was configured to simulate attacker behavior, while an Ubuntu Server VM hosted Splunk Enterprise to ingest logs for detection. Logs were forwarded using Splunk Universal Forwarder, and deep telemetry was collected via Sysmon. Atomic Red Team was used to safely simulate adversary techniques such as:
+In this lab, a Windows 10 virtual machine was configured to simulate the victim machine and the attacker behavior in it, while an Ubuntu Server VM hosted Splunk Enterprise to ingest logs for detection. Logs were forwarded using Splunk Universal Forwarder, and deep telemetry was collected via Sysmon. Atomic Red Team was used to safely simulate adversary techniques such as:
 
 - Brute force login attempts
 - Suspicious PowerShell execution
 - Registry-based persistence
 
-Multiple Splunk dashboards, alerts, and correlation rules were implemented to detect these behaviors in real time.
+Multiple Splunk Reports, dashboard, alerts, and correlation rules were implemented to detect these behaviors in real time.
 
 ---
 
@@ -22,7 +22,7 @@ Multiple Splunk dashboards, alerts, and correlation rules were implemented to de
 - **Splunk Universal Forwarder**
 - **Sysmon (SwiftOnSecurity config)**
 - **Atomic Red Team (Invoke-AtomicRedTeam)**
-- **Windows 10 VM (SOC Simulation)**
+- **Windows 10 VM (Victim Machine)**
 - **Ubuntu Server 22.04 VM (SIEM Server)**
 - **VirtualBox**
 
@@ -51,7 +51,7 @@ Multiple Splunk dashboards, alerts, and correlation rules were implemented to de
 
 ## 🚀 How to Run the Project
 
-1. **Set up VMs** with VirtualBox: Windows 10 (SOC) and Ubuntu Server (Splunk)
+1. **Set up VMs** with VirtualBox: Windows 10 (Victim machine) and Ubuntu Server (Splunk)
 2. **Install Splunk Enterprise** on Ubuntu Server
 3. **Install Splunk Universal Forwarder + Sysmon** on Windows 10 VM
 4. **Ingest logs into Splunk**, verify via search
@@ -65,8 +65,8 @@ Multiple Splunk dashboards, alerts, and correlation rules were implemented to de
 ## 📝 Key Learnings
 
 - Configured log forwarding & Sysmon for visibility
-- Simulated MITRE-mapped attacks using ART
-- Developed dashboards, alerts, and multi-event correlation SPL
+- Simulated MITRE ATT&CK-mapped attacks using Atomic Red Team
+- Developed a dashboard, alerts, and multi-event correlation SPL reports
 - Strengthened SIEM analysis and detection engineering skills
 
 ---
@@ -83,3 +83,4 @@ You can find screenshots of the dashboard panels, alerts, reports, and test resu
 - [SwiftOnSecurity Sysmon Config](https://github.com/SwiftOnSecurity/sysmon-config)
 - [MITRE ATT&CK Framework](https://attack.mitre.org/)
 - [Splunk Enterprise](https://www.splunk.com/)
+- [Splunk Universal Forwarder](https://www.splunk.com/en_us/download/universal-forwarder.html)
